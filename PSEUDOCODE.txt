@@ -1,0 +1,222 @@
+================================================================================
+                    ANAHTAR DİZİSİ ÜRETECİ - SÖZDE KOD
+================================================================================
+
+PROGRAM: Anahtar Dizisi Üreteci
+AMAÇ: Güvenli ve tahmin edilemez anahtar dizileri üretmek
+YÖNTEM: SHA-256 hash, bit manipülasyonu ve entropi kullanımı
+
+================================================================================
+                            VERİ YAPILARI
+================================================================================
+
+SINIF AnahtarUreteci:
+    ÖZELLIKLER:
+        tohum          : TAM SAYI      // Başlangıç tohum değeri
+        sayac          : TAM SAYI      // Üretilen anahtar sayısı
+
+
+================================================================================
+                        1. BAŞLATMA FONKSİYONU
+================================================================================
+
+FONKSIYON __init__(tohum):
+    GİRDİ:
+        tohum: TAM SAYI veya BOŞ (opsiyonel)
+    
+    ÇIKTI:
+        Yok (nesne başlatılır)
+    
+    İŞLEMLER:
+        EĞER tohum == BOŞ İSE:
+            // Otomatik tohum üret
+            şu_anki_zaman = ŞU_ANKİ_ZAMAN_MİKROSANİYE()
+            tohum = şu_anki_zaman
+        YOKSA:
+            tohum = verilen_tohum
+        
+        sayac = 0
+FONKSIYON_SONU
+
+
+================================================================================
+                        2. HASH FONKSİYONU
+================================================================================
+
+FONKSIYON _hash_uygula(veri):
+    GİRDİ:
+        veri: HERHANGİ BİR VERİ TİPİ
+    
+    ÇIKTI:
+        hash_sayisi: TAM SAYI (256-bit)
+    
+    İŞLEMLER:
+        // SHA-256 hash algoritması uygula
+        hash_metni = SHA256(veri)
+        
+        // Hash metnini tam sayıya çevir (hexadecimal'den)
+        hash_sayisi = HEX_TO_INTEGER(hash_metni)
+        
+        DÖNDÜR hash_sayisi
+FONKSIYON_SONU
+
+
+================================================================================
+                    3. KARIŞTIRMA FONKSİYONU
+================================================================================
+
+FONKSIYON _karistir(deger):
+    GİRDİ:
+        deger: TAM SAYI
+    
+    ÇIKTI:
+        karisik_deger: TAM SAYI
+    
+    İŞLEMLER:
+        // ADIM 1: Sağa 13 bit kaydır ve XOR işlemi
+        adim1 = deger XOR (deger SAĞA_KAYDIR 13)
+        
+        // ADIM 2: Sola 7 bit kaydır ve XOR işlemi
+        adim2 = adim1 XOR (adim1 SOLA_KAYDIR 7)
+        
+        // ADIM 3: Sağa 17 bit kaydır ve XOR işlemi
+        adim3 = adim2 XOR (adim2 SAĞA_KAYDIR 17)
+        
+        DÖNDÜR adim3
+FONKSIYON_SONU
+
+
+================================================================================
+                    4. ANA ANAHTAR ÜRETME FONKSİYONU
+================================================================================
+
+FONKSIYON anahtar_uret(uzunluk):
+    GİRDİ:
+        uzunluk: TAM SAYI (varsayılan = 16)
+    
+    ÇIKTI:
+        anahtar: METİN (hexadecimal format)
+    
+    İŞLEMLER:
+        // ----------------------------------------------------------------
+        // ADIM 1: Başlangıç değeri oluştur
+        // ----------------------------------------------------------------
+        baslangic = tohum XOR (sayac * 1000003)
+        
+        // Not: 1000003 büyük bir asal sayıdır
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 2: Hash fonksiyonu uygula
+        // ----------------------------------------------------------------
+        hash_deger = _hash_uygula(baslangic)
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 3: Karıştırma işlemi (bit manipülasyonu)
+        // ----------------------------------------------------------------
+        karisik = _karistir(hash_deger)
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 4: Zaman bazlı entropi ekle
+        // ----------------------------------------------------------------
+        zaman_entropi = ŞU_ANKİ_ZAMAN_MİKROSANİYE()
+        sonuc = karisik XOR zaman_entropi
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 5: Son hash işlemi
+        // ----------------------------------------------------------------
+        ham_anahtar = _hash_uygula(sonuc)
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 6: Hexadecimal formatına çevir
+        // ----------------------------------------------------------------
+        hex_anahtar = INTEGER_TO_HEX(ham_anahtar)
+        hex_anahtar = BÜYÜK_HARFE_ÇEVİR(hex_anahtar)
+        
+        // "0x" önekini kaldır
+        hex_anahtar = hex_anahtar[2'den sona kadar]
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 7: Uzunluğu ayarla
+        // ----------------------------------------------------------------
+        EĞER UZUNLUK(hex_anahtar) < uzunluk İSE:
+            // Yeterli uzunlukta değilse tekrarla
+            tekrar_sayisi = (uzunluk / UZUNLUK(hex_anahtar)) + 1
+            hex_anahtar = hex_anahtar * tekrar_sayisi
+        
+        // İstenen uzunlukta kes
+        anahtar = hex_anahtar[0'dan uzunluk'a kadar]
+        
+        
+        // ----------------------------------------------------------------
+        // ADIM 8: Sayacı artır
+        // ----------------------------------------------------------------
+        sayac = sayac + 1
+        
+        
+        DÖNDÜR anahtar
+FONKSIYON_SONU
+
+
+================================================================================
+                        KULLANIM ÖRNEKLERİ
+================================================================================
+
+// ============================================================================
+// ÖRNEK 1: Otomatik tohum ile anahtar üretimi
+// ============================================================================
+
+YAZDIR("Örnek 1: Otomatik Tohum")
+YAZDIR("------------------------------------------------------------")
+
+uretec1 = YENİ AnahtarUreteci(BOŞ)
+YAZDIR("Tohum: ", uretec1.tohum)
+
+anahtar1 = uretec1.anahtar_uret(16)
+YAZDIR("Anahtar 1: ", anahtar1)
+
+anahtar2 = uretec1.anahtar_uret(16)
+YAZDIR("Anahtar 2: ", anahtar2)
+
+
+// ============================================================================
+// ÖRNEK 2: Özel tohum ile anahtar üretimi
+// ============================================================================
+
+YAZDIR("Örnek 2: Özel Tohum (123456)")
+YAZDIR("------------------------------------------------------------")
+
+uretec2 = YENİ AnahtarUreteci(123456)
+YAZDIR("Tohum: ", uretec2.tohum)
+
+anahtar = uretec2.anahtar_uret(32)
+YAZDIR("Anahtar: ", anahtar)
+
+
+// ============================================================================
+// ÖRNEK 3: Farklı uzunluklarda anahtar üretimi
+// ============================================================================
+
+YAZDIR("Örnek 3: Farklı Uzunluklar")
+YAZDIR("------------------------------------------------------------")
+
+uretec3 = YENİ AnahtarUreteci(BOŞ)
+
+anahtar_8 = uretec3.anahtar_uret(8)
+YAZDIR("8 karakter:  ", anahtar_8)
+
+anahtar_16 = uretec3.anahtar_uret(16)
+YAZDIR("16 karakter: ", anahtar_16)
+
+anahtar_32 = uretec3.anahtar_uret(32)
+YAZDIR("32 karakter: ", anahtar_32)
+
+
+================================================================================
+                            SON
+================================================================================

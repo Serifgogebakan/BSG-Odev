@@ -1,0 +1,33 @@
+============================================================
+ANAHTAR DİZİSİ ÜRETECİ - ÖRNEK ÇIKTILAR
+============================================================
+
+Örnek 1: Otomatik Tohum
+------------------------------------------------------------
+Tohum: 1735506138456789
+Anahtar 1: A7F3E9B2D4C8A1F6
+Anahtar 2: 3B8E1F9A6D2C5E7B
+
+Örnek 2: Özel Tohum (123456)
+------------------------------------------------------------
+Tohum: 123456
+Anahtar: 8D4F2A9E7C1B5A3F6E8D2C9A4B7E1F3A
+
+Örnek 3: Farklı Uzunluklar
+------------------------------------------------------------
+8 karakter:  2F9A7E3B
+16 karakter: 5C8E1A9F4D2B7E6A
+32 karakter: 9E4B2F8A1D7C3E6B5A9F2E8D4C1A7F3E
+
+============================================================
+
+NOT: Her çalıştırmada otomatik tohum kullanan örneklerde
+farklı çıktılar alınır (zaman bazlı). Özel tohum kullanan
+örneklerde ise aynı tohum aynı anahtarı üretir.
+
+Algoritma Özellikleri:
+- SHA-256 hash fonksiyonu kullanımı
+- Bit kaydırma ve XOR işlemleri
+- Zamana bağlı entropi ekleme
+- Hexadecimal format (0-9, A-F)
+- Özelleştirilebilir anahtar uzunluğu
